@@ -1,0 +1,19 @@
+services:
+  asustor-frontpanel:
+    image: asustor-frontpanel:0.1.6
+    pull_policy: never
+    restart: unless-stopped
+    privileged: true
+    environment:
+      LCD_DEVICE: /host-dev/ttyS1
+      SMART_DEVICE_TYPE: "sat"
+      POLL_SECONDS: "300"
+      LCD_ON_SECONDS: "30"
+      STATUS_LINE1: "TrueNAS AS6510T"
+      # Override this after verifying physical bay order. The default below
+      # matches the current NAS disk enumeration (sda through sde).
+      BAY_DEVICE_MAP: "1=/host-dev/sda,2=/host-dev/sdb,3=/host-dev/sdc,4=/host-dev/sdd,5=/host-dev/sde"
+    volumes:
+      - /dev:/host-dev
+      - /sys:/host-sys:ro
+      - /run/udev:/host-run/udev:ro
