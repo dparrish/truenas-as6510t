@@ -174,10 +174,11 @@ class Hardware:
         subprocess.run([IT87CTL, "set", str(gpio), str(value)], check=True, timeout=5)
 
     def set_status_ready(self) -> None:
-        # AS6510T status LED is active-low: logical on is IT87 value 0.
-        if self.last_status is not True:
-            self.gpio(STATUS_GPIO, 0)
-            self.last_status = True
+        # The requested post-boot behavior is no flashing status indicator.
+        # ASUSTOR vendor mode 0 is off, which is IT87 GPIO value 1.
+        if self.last_status is not False:
+            self.gpio(STATUS_GPIO, 1)
+            self.last_status = False
 
     def set_disk(self, bay: int, fault: bool) -> None:
         if not 1 <= bay <= len(RED_GPIOS):

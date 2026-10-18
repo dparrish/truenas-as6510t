@@ -4,7 +4,7 @@ This is a TrueNAS Custom App for the ASUSTOR AS6510T front panel.
 
 It provides:
 
-- A steady status LED after the controller reaches readiness.
+- The flashing status LED is disabled after the controller reaches readiness.
 - A two-line LCD status display.
 - LCD power timeout after 30 seconds.
 - LCD wake on any LCD button event.
@@ -20,7 +20,7 @@ The container is privileged because the AS6510T front LEDs use legacy I/O ports 
 The TrueNAS Apps service must be configured first. Build the image on the NAS or in a compatible Linux Docker environment:
 
 ```sh
-docker build -t asustor-frontpanel:0.1.6 .
+docker build -t asustor-frontpanel:0.1.7 .
 ```
 
 The app YAML is `compose.yaml`. In TrueNAS, choose **Apps → Discover → Custom App → Install via YAML**, then paste that file. The YAML expects the image tag above to exist locally or in a registry accessible to the Apps service.
@@ -41,7 +41,7 @@ This matches the current AS6510T enumeration observed during development. Linux 
 
 ## Behavior
 
-The status LED is set steady on when the service starts. It is not used as a disk fault indicator. A disk with a failed SMART health result, a nonzero ATA error log count, a nonzero error-information log count, an inaccessible configured path, or a SMART command failure gets a red LED. Healthy disks have their red alert LED turned off; the existing green/activity state is left alone.
+The status LED is disabled when the service starts. It is not used as a disk fault indicator. A disk with a failed SMART health result, a nonzero ATA error log count, a nonzero error-information log count, an inaccessible configured path, or a SMART command failure gets a red LED. Healthy disks have their red alert LED turned off; the existing green/activity state is left alone.
 
 SMART checks run every five minutes and use `smartctl -d sat -n standby,0`, so sleeping disks are not spun up solely by this app. A disk left in standby is treated as unknown/healthy until a later active check.
 
