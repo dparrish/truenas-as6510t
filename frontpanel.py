@@ -30,6 +30,7 @@ LCD_DEVICE = os.getenv("LCD_DEVICE", "/host-dev/ttyS1")
 DISK_ROOT = Path(os.getenv("DISK_ROOT", "/host-dev"))
 POLL_SECONDS = max(30, int(os.getenv("POLL_SECONDS", "300")))
 LCD_ON_SECONDS = max(1, int(os.getenv("LCD_ON_SECONDS", "30")))
+LCD_STARTUP_DELAY_SECONDS = max(0.0, float(os.getenv("LCD_STARTUP_DELAY_SECONDS", "3")))
 STATUS_LINE1 = os.getenv("STATUS_LINE1", "TrueNAS AS6510T")
 TRUENAS_API_URL = os.getenv("TRUENAS_API_URL", "wss://192.168.1.5/api/current")
 TRUENAS_API_USERNAME = os.getenv("TRUENAS_API_USERNAME", "")
@@ -294,14 +295,15 @@ def main() -> int:
     signal.signal(signal.SIGINT, stop)
 
     lcd_on = True
-    last_wake = time.monotonic()
     next_scan = 0.0
     states: list[DiskState] = []
     try:
         lcd.set_power(True)
+        hardware.set_status_ready()
+        time.sleep(LCD_STARTUP_DELAY_SECONDS)
         lcd.set_text(0, STATUS_LINE1)
         lcd.set_text(1, primary_ip())
-        hardware.set_status_ready()
+        last_wake = time.monotonic()
         while not stopped:
             now = time.monotonic()
             if now >= next_scan:
