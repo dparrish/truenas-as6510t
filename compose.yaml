@@ -1,12 +1,17 @@
 services:
   asustor-frontpanel:
-    image: asustor-frontpanel:0.1.8
+    image: asustor-frontpanel:0.1.11
     pull_policy: never
     restart: unless-stopped
     privileged: true
+    network_mode: host
     environment:
+      TRUENAS_API_URL: "wss://192.168.1.5/api/current"
+      TRUENAS_API_USERNAME: "dparrish"
+      TRUENAS_TLS_VERIFY: "false"
+      # Replace this with the API key created for this app.
+      TRUENAS_API_KEY: "REPLACE_WITH_TRUENAS_API_KEY"
       LCD_DEVICE: /host-dev/ttyS1
-      SMART_DEVICE_TYPE: "sat"
       POLL_SECONDS: "300"
       LCD_ON_SECONDS: "30"
       STATUS_LINE1: "TrueNAS AS6510T"

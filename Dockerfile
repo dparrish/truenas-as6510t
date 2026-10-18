@@ -4,9 +4,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends smartmontools gcc libc6-dev \
+    && apt-get install -y --no-install-recommends gcc libc6-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install --no-cache-dir websockets
 COPY it87ctl.c /tmp/it87ctl.c
 RUN gcc -O2 -Wall -Wextra -Werror -o /usr/local/bin/it87ctl /tmp/it87ctl.c \
     && rm /tmp/it87ctl.c \

@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
-from frontpanel import analyze_smart, checksum, frame, parse_bay_map, status_line, DiskState
+from frontpanel import checksum, frame, parse_bay_map, status_line, DiskState, TrueNASClient
 
 
 class FrontPanelTests(unittest.TestCase):
@@ -18,11 +18,10 @@ class FrontPanelTests(unittest.TestCase):
         self.assertEqual(str(result[1]), "/host-dev/sda")
         self.assertEqual(str(result[5]), "/host-dev/sde")
 
-    def test_smart_pass_and_error_log(self):
-        passed = "SMART overall-health self-assessment test result: PASSED\nATA Error Count: 0"
-        failed = "SMART overall-health self-assessment test result: PASSED\nATA Error Count: 2"
-        self.assertEqual(analyze_smart(passed, 0), (False, "ok"))
-        self.assertEqual(analyze_smart(failed, 0), (True, "error log"))
+    def test_alert_matching_is_recursive(self):
+        alert = {"formatted": "Disk sda SMART failure", "args": {"dev": "sda"}}
+        self.assertTrue(TrueNASClient._contains(alert, {"sda"}))
+        self.assertFalse(TrueNASClient._contains(alert, {"sdb"}))
 
     def test_status_line_reports_faulty_bay(self):
         states = [

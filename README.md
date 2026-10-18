@@ -8,21 +8,21 @@ It provides:
 - A two-line LCD status display.
 - LCD power timeout after 30 seconds.
 - LCD wake on any LCD button event.
-- SMART polling for configured disks.
-- Red disk alert LEDs for SMART faults.
+- TrueNAS API-backed disk inventory and alert monitoring.
+- Red disk alert LEDs for TrueNAS-reported disk faults.
 
 ## Important security note
 
-The container is privileged because the AS6510T front LEDs use legacy I/O ports and SMART requires direct access to host disk devices. This gives the container broad access to the TrueNAS host. Only build and run this image from source that you trust.
+The container is privileged because the AS6510T front LEDs use legacy I/O ports. It connects to the TrueNAS WebSocket API for disk and alert state, so it no longer runs `smartctl` itself. This still gives the container broad access to the host hardware; only build and run this image from source that you trust.
 
 ## Build
 
 The TrueNAS Apps service must be configured first. Build the image on the NAS or in a compatible Linux Docker environment:
 
 ```sh
-docker build -t asustor-frontpanel:0.1.8 .
-
-The app YAML is `compose.yaml`. In TrueNAS, choose **Apps → Discover → Custom App → Install via YAML**, then paste that file. The YAML expects the image tag above to exist locally or in a registry accessible to the Apps service.
+docker build -t asustor-frontpanel:0.1.11 .
+```
+The app YAML is `compose.yaml`. Set `TRUENAS_API_USERNAME` and `TRUENAS_API_KEY` to a TrueNAS API key before installing. The key must be able to read `disk.query` and `alert.list`. In TrueNAS 27, the app uses the JSON-RPC WebSocket endpoint `/api/current`.
 
 ## Disk-to-bay mapping
 
@@ -40,9 +40,7 @@ This matches the current AS6510T enumeration observed during development. Linux 
 
 ## Behavior
 
-The status LED is disabled when the service starts. The app first removes the AS6510T status GPIO (IT8625E GP47) from the hardware blink engine, then drives it to the vendor-compatible off level. It is not used as a disk fault indicator. A disk with a failed SMART health result, a nonzero ATA error log count, a nonzero error-information log count, an inaccessible configured path, or a SMART command failure gets a red LED. Healthy disks have their red alert LED turned off; the existing green/activity state is left alone.
-
-SMART checks run every five minutes and use `smartctl -d sat -n standby,0`, so sleeping disks are not spun up solely by this app. A disk left in standby is treated as unknown/healthy until a later active check.
+The status LED is disabled when the service starts. The app first removes the AS6510T status GPIO (IT8625E GP47) from the hardware blink engine, then drives it to the vendor-compatible off level. Disk inventory and health come from TrueNAS `disk.query` and `alert.list`; the app sets a bay's red LED when an active TrueNAS alert references that disk. Healthy disks have their red alert LED turned off; the existing green/activity state is left alone.
 
 The LCD line 1 is `TrueNAS AS6510T`. Line 2 is one of:
 
