@@ -53,7 +53,8 @@ def checksum(body: bytes) -> int:
 
 
 def frame(function: int, payload: bytes = b"", message_type: int = 0xF0) -> bytes:
-    body = bytes((message_type, len(payload) + 1, function)) + payload
+    # The LCD length byte counts payload bytes, not the function byte.
+    body = bytes((message_type, len(payload), function)) + payload
     return body + bytes((checksum(body),))
 
 

@@ -1,6 +1,6 @@
 services:
   asustor-frontpanel:
-    image: asustor-frontpanel:0.1.15
+    image: asustor-frontpanel:0.1.16
     pull_policy: never
     restart: unless-stopped
     privileged: true

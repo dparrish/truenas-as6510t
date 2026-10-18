@@ -10,7 +10,7 @@ from frontpanel import checksum, frame, parse_bay_map, status_line, DiskState, T
 class FrontPanelTests(unittest.TestCase):
     def test_lcd_frame_checksum(self):
         packet = frame(0x13, b"\x01")
-        self.assertEqual(packet, bytes.fromhex("f0 02 13 01 06"))
+        self.assertEqual(packet, bytes.fromhex("f0 01 13 01 05"))
         self.assertEqual(checksum(packet[:-1]), packet[-1])
 
     def test_bay_map(self):
