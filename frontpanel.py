@@ -30,7 +30,7 @@ LCD_DEVICE = os.getenv("LCD_DEVICE", "/host-dev/ttyS1")
 DISK_ROOT = Path(os.getenv("DISK_ROOT", "/host-dev"))
 POLL_SECONDS = max(30, int(os.getenv("POLL_SECONDS", "300")))
 LCD_ON_SECONDS = max(1, int(os.getenv("LCD_ON_SECONDS", "30")))
-LCD_STARTUP_DELAY_SECONDS = max(0.0, float(os.getenv("LCD_STARTUP_DELAY_SECONDS", "3")))
+LCD_STARTUP_DELAY_SECONDS = max(0.0, float(os.getenv("LCD_STARTUP_DELAY_SECONDS", "6")))
 STATUS_LINE1 = os.getenv("STATUS_LINE1", "TrueNAS AS6510T")
 TRUENAS_API_URL = os.getenv("TRUENAS_API_URL", "wss://192.168.1.5/api/current")
 TRUENAS_API_USERNAME = os.getenv("TRUENAS_API_USERNAME", "")
@@ -202,6 +202,11 @@ class LCD:
 
     def set_power(self, on: bool) -> None:
         self.send(0x11, bytes((1 if on else 0,)))
+        if on:
+            self.send(0x22, b"\x00")
+
+    def clear(self) -> None:
+        self.send(0x12, b"\x01")
 
     def set_text(self, line: int, text: str) -> None:
         encoded = text.encode("ascii", "replace")[:16].ljust(16, b" ")
@@ -301,6 +306,7 @@ def main() -> int:
         lcd.set_power(True)
         hardware.set_status_ready()
         time.sleep(LCD_STARTUP_DELAY_SECONDS)
+        lcd.clear()
         lcd.set_text(0, STATUS_LINE1)
         lcd.set_text(1, primary_ip())
         last_wake = time.monotonic()

@@ -1,6 +1,6 @@
 services:
   asustor-frontpanel:
-    image: asustor-frontpanel:0.1.14
+    image: asustor-frontpanel:0.1.15
     pull_policy: never
     restart: unless-stopped
     privileged: true
@@ -13,7 +13,7 @@ services:
       TRUENAS_API_KEY: "REPLACE_WITH_TRUENAS_API_KEY"
       LCD_DEVICE: /host-dev/ttyS1
       POLL_SECONDS: "300"
-      LCD_STARTUP_DELAY_SECONDS: "3"
+      LCD_STARTUP_DELAY_SECONDS: "6"
       STATUS_LINE1: "TrueNAS AS6510T"
       # Override this after verifying physical bay order. The default below
       # matches the current NAS disk enumeration (sda through sde).
