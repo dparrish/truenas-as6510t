@@ -20,7 +20,7 @@ The container is privileged because the AS6510T front LEDs use legacy I/O ports.
 The TrueNAS Apps service must be configured first. Build the image on the NAS or in a compatible Linux Docker environment:
 
 ```sh
-docker build -t asustor-frontpanel:0.1.11 .
+docker build -t asustor-frontpanel:0.1.13 .
 ```
 The app YAML is `compose.yaml`. Set `TRUENAS_API_USERNAME` and `TRUENAS_API_KEY` to a TrueNAS API key before installing. The key must be able to read `disk.query` and `alert.list`. In TrueNAS 27, the app uses the JSON-RPC WebSocket endpoint `/api/current`.
 
@@ -50,7 +50,7 @@ SMART ERR D1,D2
 SMART NO DISKS
 ```
 
-The LCD is powered on at startup and after any valid LCD button event. It is powered off after 30 seconds without a button event. The serial protocol is the one implemented by https://github.com/mafredri/lcm.
+The LCD is populated immediately at startup with `TrueNAS AS6510T` on line 1 and the NAS primary IP address on line 2. The API result replaces line 2 with the current disk status. It is powered on at startup and after any valid LCD button event, then powered off after 30 seconds without a button event. The serial protocol is the one implemented by https://github.com/mafredri/lcm.
 
 ## Rollback
 

@@ -12,6 +12,7 @@ import logging
 import os
 import select
 import signal
+import socket
 import ssl
 import subprocess
 import time
@@ -34,6 +35,16 @@ TRUENAS_API_URL = os.getenv("TRUENAS_API_URL", "wss://192.168.1.5/api/current")
 TRUENAS_API_USERNAME = os.getenv("TRUENAS_API_USERNAME", "")
 TRUENAS_API_KEY = os.getenv("TRUENAS_API_KEY", "")
 TRUENAS_TLS_VERIFY = os.getenv("TRUENAS_TLS_VERIFY", "false").lower() == "true"
+def primary_ip() -> str:
+    configured = os.getenv("PRIMARY_IP", "").strip()
+    if configured:
+        return configured
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+            probe.connect(("192.0.2.1", 9))
+            return probe.getsockname()[0]
+    except OSError:
+        return "IP UNKNOWN"
 
 
 def checksum(body: bytes) -> int:
@@ -288,6 +299,8 @@ def main() -> int:
     states: list[DiskState] = []
     try:
         lcd.set_power(True)
+        lcd.set_text(0, STATUS_LINE1)
+        lcd.set_text(1, primary_ip())
         hardware.set_status_ready()
         while not stopped:
             now = time.monotonic()
