@@ -20,7 +20,8 @@ from typing import Iterable
 
 LOG = logging.getLogger("asustor-frontpanel")
 
-STATUS_GPIO = 0
+STATUS_GPIO = 47
+STATUS_OFF_VALUE = 1
 RED_GPIOS = (4, 6, 8, 17, 19, 39, 36, 33, 29, 22)
 SMARTCTL = os.getenv("SMARTCTL", "/usr/sbin/smartctl")
 SMART_DEVICE_TYPE = os.getenv("SMART_DEVICE_TYPE", "sat")
@@ -174,10 +175,14 @@ class Hardware:
         subprocess.run([IT87CTL, "set", str(gpio), str(value)], check=True, timeout=5)
 
     def set_status_ready(self) -> None:
-        # The requested post-boot behavior is no flashing status indicator.
-        # ASUSTOR vendor mode 0 is off, which is IT87 GPIO value 1.
+        # GP47 is the AS6510T status LED and is selected by IT8625E GPLED1.
+        # Move it out of the hardware blink engine before setting it off.
         if self.last_status is not False:
-            self.gpio(STATUS_GPIO, 1)
+            subprocess.run(
+                [IT87CTL, "disable-blink", str(STATUS_GPIO), str(STATUS_OFF_VALUE)],
+                check=True,
+                timeout=5,
+            )
             self.last_status = False
 
     def set_disk(self, bay: int, fault: bool) -> None:
